@@ -4,6 +4,9 @@
 ## VSCode
 .vscode
 
+## Pycharm 
+.idea
+
 ## ESP
 sdkconfig
 *.old
