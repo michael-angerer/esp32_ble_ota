@@ -10,6 +10,7 @@
 ## ESP
 sdkconfig
 *.old
+*.bin
 
 ### C ###
 # Prerequisites
