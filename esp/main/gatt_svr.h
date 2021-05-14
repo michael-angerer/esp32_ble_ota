@@ -4,8 +4,22 @@
 #include "host/ble_uuid.h"
 #include "services/gap/ble_svc_gap.h"
 #include "services/gatt/ble_svc_gatt.h"
+#include "esp_ota_ops.h"
 
 #define LOG_TAG_GATT_SVR "gatt_svr"
+#define REBOOT_DEEP_SLEEP_TIMEOUT 500
+#define OTA_PACKET_SIZE 250
+
+typedef enum {
+  SVR_CHR_OTA_CONTROL_NOP,
+  SVR_CHR_OTA_CONTROL_REQUEST,
+  SVR_CHR_OTA_CONTROL_REQUEST_ACK,
+  SVR_CHR_OTA_CONTROL_REQUEST_NAK,
+  SVR_CHR_OTA_CONTROL_DONE,
+  SVR_CHR_OTA_CONTROL_DONE_ACK,
+  SVR_CHR_OTA_CONTROL_DONE_NAK,
+} svr_chr_ota_control_val_t;
+
 
 // service: OTA Service
 // d6f1d96d-594c-4c53-b1c6-244a1dfde6d8
