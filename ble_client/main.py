@@ -21,7 +21,6 @@ async def _search_for_esp32():
 
     devices = await BleakScanner.discover()
     for device in devices:
-        print(device.name)
         if device.name == "esp32":
             esp32 = device
 
@@ -34,12 +33,12 @@ async def _search_for_esp32():
     return esp32
 
 
-async def _send_ota():
+async def send_ota(file_path):
     t0 = datetime.datetime.now()
     queue = asyncio.Queue()
     firmware = []
 
-    with open("esp32_ble_ota.bin", "rb") as file:
+    with open(file_path, "rb") as file:
         while junk := file.read(200):
             firmware.append(junk)
     firmware.reverse()
@@ -59,7 +58,6 @@ async def _send_ota():
         async def _ota_notification_handler(sender: int, data: bytearray):
             if data == SVR_CHR_OTA_CONTROL_REQUEST_ACK:
                 print("ESP32: OTA request acknowledged.")
-                await _send_pkg(firmware.pop())
                 await queue.put("ack")
             elif data == SVR_CHR_OTA_CONTROL_REQUEST_NAK:
                 print("ESP32: OTA request NOT acknowledged.")
@@ -110,10 +108,6 @@ async def _send_ota():
             print("ESP32 did not acknowledge the OTA request.")
 
 
-def main():
-    asyncio.run(_send_ota())
-
-
 if __name__ == '__main__':
-    main()
+    asyncio.run(send_ota("esp32_ble_ota.bin"))
 
