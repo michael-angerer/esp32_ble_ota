@@ -6,28 +6,32 @@ from bleak import BleakClient, BleakScanner
 OTA_PACKET_UUID = '23408888-1F40-4CD8-9B89-CA8D45F8A5B0'
 OTA_CONTROL_UUID = '7AD671AA-21C0-46A4-B722-270E3AE3D830'
 
-OTA_CHR_REQUEST = bytearray.fromhex("00")
-OTA_CHR_REQUEST_ACK = bytearray.fromhex("01")
-OTA_CHR_DONE = bytearray.fromhex("02")
-OTA_CHR_DONE_ACK = bytearray.fromhex("03")
+SVR_CHR_OTA_CONTROL_NOP = bytearray.fromhex("00")
+SVR_CHR_OTA_CONTROL_REQUEST = bytearray.fromhex("01")
+SVR_CHR_OTA_CONTROL_REQUEST_ACK = bytearray.fromhex("02")
+SVR_CHR_OTA_CONTROL_REQUEST_NAK = bytearray.fromhex("03")
+SVR_CHR_OTA_CONTROL_DONE = bytearray.fromhex("04")
+SVR_CHR_OTA_CONTROL_DONE_ACK = bytearray.fromhex("05")
+SVR_CHR_OTA_CONTROL_DONE_NAK = bytearray.fromhex("06")
 
 
 async def _search_for_esp32():
     print("Searching for ESP32...")
-    device = None
+    esp32 = None
 
     devices = await BleakScanner.discover()
     for device in devices:
-        if device.name == "ring":
-            device = device
+        print(device.name)
+        if device.name == "esp32":
+            esp32 = device
 
-    if device is not None:
+    if esp32 is not None:
         print("ESP32 found!")
     else:
         print("ESP32 has not been found.")
-        assert device is not None
+        assert esp32 is not None
 
-    return device
+    return esp32
 
 
 async def _send_ota():
@@ -35,7 +39,7 @@ async def _send_ota():
     queue = asyncio.Queue()
     firmware = []
 
-    with open("firmware.bin", "rb") as file:
+    with open("esp32_ble_ota.bin", "rb") as file:
         while junk := file.read(200):
             firmware.append(junk)
     firmware.reverse()
@@ -53,13 +57,21 @@ async def _send_ota():
             )
 
         async def _ota_notification_handler(sender: int, data: bytearray):
-            if data == OTA_CHR_REQUEST_ACK:
+            if data == SVR_CHR_OTA_CONTROL_REQUEST_ACK:
                 print("ESP32: OTA request acknowledged.")
                 await _send_pkg(firmware.pop())
                 await queue.put("ack")
-            elif data == OTA_CHR_DONE_ACK:
+            elif data == SVR_CHR_OTA_CONTROL_REQUEST_NAK:
+                print("ESP32: OTA request NOT acknowledged.")
+                await queue.put("nak")
+                await client.stop_notify(OTA_CONTROL_UUID)
+            elif data == SVR_CHR_OTA_CONTROL_DONE_ACK:
                 print("ESP32: OTA done acknowledged.")
                 await queue.put("ack")
+                await client.stop_notify(OTA_CONTROL_UUID)
+            elif data == SVR_CHR_OTA_CONTROL_DONE_NAK:
+                print("ESP32: OTA done NOT acknowledged.")
+                await queue.put("nak")
                 await client.stop_notify(OTA_CONTROL_UUID)
             else:
                 print(f"Notification received: sender: {sender}, data: {data}")
@@ -72,7 +84,7 @@ async def _send_ota():
         print("Sending OTA request.")
         await client.write_gatt_char(
             OTA_CONTROL_UUID,
-            OTA_CHR_REQUEST
+            SVR_CHR_OTA_CONTROL_REQUEST
         )
         await asyncio.sleep(1)
 
@@ -84,7 +96,7 @@ async def _send_ota():
             print("Sending OTA done.")
             await client.write_gatt_char(
                 OTA_CONTROL_UUID,
-                OTA_CHR_DONE
+                SVR_CHR_OTA_CONTROL_DONE
             )
             await asyncio.sleep(1)
 
