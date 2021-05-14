@@ -98,15 +98,19 @@ static void update_ota_control(uint16_t conn_handle) {
       ESP_LOGE(LOG_TAG_GATT_SVR, "esp_ota_begin failed (%s)",
               esp_err_to_name(err));
       esp_ota_abort(update_handle);
+      gatt_svr_chr_ota_control_val = SVR_CHR_OTA_CONTROL_REQUEST_NAK;
+    } else {
+      gatt_svr_chr_ota_control_val = SVR_CHR_OTA_CONTROL_REQUEST_ACK;
     }
-    // notify the client via BLE that the OTA has been acknowledged
-    gatt_svr_chr_ota_control_val = SVR_CHR_OTA_CONTROL_REQUEST_ACK;
+
+    // notify the client via BLE that the OTA has been acknowledged (or not)
     om = ble_hs_mbuf_from_flat(&gatt_svr_chr_ota_control_val,
                               sizeof(gatt_svr_chr_ota_control_val));
     ble_gattc_notify_custom(conn_handle, ota_control_val_handle, om);
     ESP_LOGI(LOG_TAG_GATT_SVR, "OTA request acknowledgement has been sent.");
 
     updating = true;
+    num_pkgs_received = 0;
     break;
   
   case SVR_CHR_OTA_CONTROL_DONE:
@@ -205,6 +209,10 @@ static int gatt_svr_chr_ota_packet_cb(uint16_t conn_handle,
   if (updating) {
     err = esp_ota_write(update_handle,
                     (const void *)gatt_svr_chr_ota_packet_val, OTA_PACKET_SIZE);
+    if (err != ESP_OK) {
+      ESP_LOGE(LOG_TAG_GATT_SVR, "esp_ota_write failed (%s)!",
+                  esp_err_to_name(err));
+    }
   }
   
   num_pkgs_received++;
