@@ -39,9 +39,8 @@ async def send_ota(file_path):
     firmware = []
 
     with open(file_path, "rb") as file:
-        while junk := file.read(200):
+        while junk := file.read(250):
             firmware.append(junk)
-    firmware.reverse()
     sum_pkgs = len(firmware)
     num_sent_pkgs = 0
 
@@ -53,6 +52,7 @@ async def send_ota(file_path):
             await client.write_gatt_char(
                 OTA_PACKET_UUID,
                 pkg_to_sent,
+                response=True
             )
 
         async def _ota_notification_handler(sender: int, data: bytearray):
