@@ -44,7 +44,7 @@ async def send_ota(file_path):
     async with BleakClient(esp32) as client:
 
         async def _send_pkg(pkg_to_sent):
-            print(f"Sending pkg {num_sent_pkgs}/{sum_pkgs}.")
+            print(f"Sending packet {num_sent_pkgs}/{sum_pkgs}.")
             await client.write_gatt_char(
                 OTA_DATA_UUID,
                 pkg_to_sent,
@@ -78,7 +78,7 @@ async def send_ota(file_path):
         # note this only works with Bleak >= 0.12.0
         packet_size = (client.mtu_size - 3)
 
-        print(f"Sending packet size: {packet_size}")
+        print(f"Sending packet size: {packet_size}.")
         await client.write_gatt_char(
             OTA_DATA_UUID,
             packet_size.to_bytes(2, 'little'),

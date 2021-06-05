@@ -12,8 +12,12 @@ bool updating = false;
 uint16_t num_pkgs_received = 0;
 uint16_t packet_size = 0;
 
+static const char *manuf_name = "Company 42";
+static const char *model_num = "ESP32";
+
 static int gatt_svr_chr_write(struct os_mbuf *om, uint16_t min_len,
                               uint16_t max_len, void *dst, uint16_t *len);
+
 static int gatt_svr_chr_access_cb_read_write(uint16_t conn_handle,
                                              uint16_t attr_handle,
                                              struct ble_gatt_access_ctxt *ctxt,
@@ -24,12 +28,38 @@ static int gatt_svr_chr_ota_control_cb(uint16_t conn_handle,
                                        struct ble_gatt_access_ctxt *ctxt,
                                        void *arg);
 
-static int gatt_svr_chr_ota_data_cb(uint16_t conn_handle,
-                                      uint16_t attr_handle,
-                                      struct ble_gatt_access_ctxt *ctxt,
-                                      void *arg);
+static int gatt_svr_chr_ota_data_cb(uint16_t conn_handle, uint16_t attr_handle,
+                                    struct ble_gatt_access_ctxt *ctxt,
+                                    void *arg);
+
+static int gatt_svr_chr_access_device_info(uint16_t conn_handle,
+                                           uint16_t attr_handle,
+                                           struct ble_gatt_access_ctxt *ctxt,
+                                           void *arg);
 
 static const struct ble_gatt_svc_def gatt_svr_svcs[] = {
+    {// Service: Device Information
+     .type = BLE_GATT_SVC_TYPE_PRIMARY,
+     .uuid = BLE_UUID16_DECLARE(GATT_DEVICE_INFO_UUID),
+     .characteristics =
+         (struct ble_gatt_chr_def[]){
+             {
+                 // Characteristic: Manufacturer Name
+                 .uuid = BLE_UUID16_DECLARE(GATT_MANUFACTURER_NAME_UUID),
+                 .access_cb = gatt_svr_chr_access_device_info,
+                 .flags = BLE_GATT_CHR_F_READ,
+             },
+             {
+                 // Characteristic: Model Number
+                 .uuid = BLE_UUID16_DECLARE(GATT_MODEL_NUMBER_UUID),
+                 .access_cb = gatt_svr_chr_access_device_info,
+                 .flags = BLE_GATT_CHR_F_READ,
+             },
+             {
+                 0,
+             },
+         }},
+
     {
         // service: OTA Service
         .type = BLE_GATT_SVC_TYPE_PRIMARY,
@@ -60,6 +90,29 @@ static const struct ble_gatt_svc_def gatt_svr_svcs[] = {
         0,
     },
 };
+
+static int gatt_svr_chr_access_device_info(uint16_t conn_handle,
+                                           uint16_t attr_handle,
+                                           struct ble_gatt_access_ctxt *ctxt,
+                                           void *arg) {
+  uint16_t uuid;
+  int rc;
+
+  uuid = ble_uuid_u16(ctxt->chr->uuid);
+
+  if (uuid == GATT_MODEL_NUMBER_UUID) {
+    rc = os_mbuf_append(ctxt->om, model_num, strlen(model_num));
+    return rc == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
+  }
+
+  if (uuid == GATT_MANUFACTURER_NAME_UUID) {
+    rc = os_mbuf_append(ctxt->om, manuf_name, strlen(manuf_name));
+    return rc == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
+  }
+
+  assert(0);
+  return BLE_ATT_ERR_UNLIKELY;
+}
 
 static int gatt_svr_chr_write(struct os_mbuf *om, uint16_t min_len,
                               uint16_t max_len, void *dst, uint16_t *len) {
@@ -109,7 +162,8 @@ static void update_ota_control(uint16_t conn_handle) {
       ESP_LOGI(LOG_TAG_GATT_SVR, "OTA request acknowledgement has been sent.");
 
       // retrieve the packet size from OTA data
-      packet_size = (gatt_svr_chr_ota_data_val[1] << 8) + gatt_svr_chr_ota_data_val[0];
+      packet_size =
+          (gatt_svr_chr_ota_data_val[1] << 8) + gatt_svr_chr_ota_data_val[0];
       ESP_LOGI(LOG_TAG_GATT_SVR, "Packet size is: %d", packet_size);
 
       updating = true;
@@ -198,13 +252,11 @@ static int gatt_svr_chr_ota_control_cb(uint16_t conn_handle,
   return BLE_ATT_ERR_UNLIKELY;
 }
 
-static int gatt_svr_chr_ota_data_cb(uint16_t conn_handle,
-                                      uint16_t attr_handle,
-                                      struct ble_gatt_access_ctxt *ctxt,
-                                      void *arg) {
+static int gatt_svr_chr_ota_data_cb(uint16_t conn_handle, uint16_t attr_handle,
+                                    struct ble_gatt_access_ctxt *ctxt,
+                                    void *arg) {
   int rc;
   esp_err_t err;
-
 
   // store the received data into gatt_svr_chr_ota_data_val
   rc = gatt_svr_chr_write(ctxt->om, 1, sizeof(gatt_svr_chr_ota_data_val),
@@ -212,16 +264,15 @@ static int gatt_svr_chr_ota_data_cb(uint16_t conn_handle,
 
   // write the received packet to the partition
   if (updating) {
-    err =
-        esp_ota_write(update_handle, (const void *)gatt_svr_chr_ota_data_val,
-                      packet_size);
+    err = esp_ota_write(update_handle, (const void *)gatt_svr_chr_ota_data_val,
+                        packet_size);
     if (err != ESP_OK) {
       ESP_LOGE(LOG_TAG_GATT_SVR, "esp_ota_write failed (%s)!",
                esp_err_to_name(err));
     }
 
     num_pkgs_received++;
-    ESP_LOGI(LOG_TAG_GATT_SVR, "Received package %d", num_pkgs_received);
+    ESP_LOGI(LOG_TAG_GATT_SVR, "Received packet %d", num_pkgs_received);
   }
 
   return rc;
