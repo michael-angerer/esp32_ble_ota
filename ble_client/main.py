@@ -37,11 +37,7 @@ async def send_ota(file_path):
     t0 = datetime.datetime.now()
     queue = asyncio.Queue()
     firmware = []
-
-    with open(file_path, "rb") as file:
-        while junk := file.read(250):
-            firmware.append(junk)
-    sum_pkgs = len(firmware)
+    sum_pkgs = 0
     num_sent_pkgs = 0
 
     esp32 = await _search_for_esp32()
@@ -88,6 +84,12 @@ async def send_ota(file_path):
             packet_size.to_bytes(2, 'little'),
             response=True
         )
+
+        # split the firmware into packets
+        with open(file_path, "rb") as file:
+            while junk := file.read(packet_size):
+                firmware.append(junk)
+        sum_pkgs = len(firmware)
 
         print("Sending OTA request.")
         await client.write_gatt_char(
