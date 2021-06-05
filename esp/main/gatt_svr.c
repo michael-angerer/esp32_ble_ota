@@ -204,10 +204,6 @@ static int gatt_svr_chr_ota_packet_cb(uint16_t conn_handle,
   rc = gatt_svr_chr_write(ctxt->om, 1, sizeof(gatt_svr_chr_ota_packet_val),
                           gatt_svr_chr_ota_packet_val, NULL);
 
-  ESP_LOGE(LOG_TAG_GATT_SVR, "%x %x %x %x - %x", gatt_svr_chr_ota_packet_val[0],
-           gatt_svr_chr_ota_packet_val[1], gatt_svr_chr_ota_packet_val[2],
-           gatt_svr_chr_ota_packet_val[3], gatt_svr_chr_ota_packet_val[249]);
-
   // write the received packet to the partition
   if (updating) {
     err =
