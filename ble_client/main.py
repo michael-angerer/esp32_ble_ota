@@ -3,7 +3,7 @@ import datetime
 from bleak import BleakClient, BleakScanner
 
 
-OTA_PACKET_UUID = '23408888-1F40-4CD8-9B89-CA8D45F8A5B0'
+OTA_DATA_UUID = '23408888-1F40-4CD8-9B89-CA8D45F8A5B0'
 OTA_CONTROL_UUID = '7AD671AA-21C0-46A4-B722-270E3AE3D830'
 
 SVR_CHR_OTA_CONTROL_NOP = bytearray.fromhex("00")
@@ -50,7 +50,7 @@ async def send_ota(file_path):
         async def _send_pkg(pkg_to_sent):
             print(f"Sending pkg {num_sent_pkgs}/{sum_pkgs}.")
             await client.write_gatt_char(
-                OTA_PACKET_UUID,
+                OTA_DATA_UUID,
                 pkg_to_sent,
                 response=True
             )
@@ -79,11 +79,22 @@ async def send_ota(file_path):
             _ota_notification_handler
         )
 
+        # note this only works with Bleak >= 0.12.0
+        packet_size = (client.mtu_size - 3)
+
+        print(f"Sending packet size: {packet_size}")
+        await client.write_gatt_char(
+            OTA_DATA_UUID,
+            packet_size.to_bytes(2, 'little'),
+            response=True
+        )
+
         print("Sending OTA request.")
         await client.write_gatt_char(
             OTA_CONTROL_UUID,
             SVR_CHR_OTA_CONTROL_REQUEST
         )
+
         await asyncio.sleep(1)
 
         if await queue.get() == "ack":

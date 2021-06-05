@@ -1,15 +1,16 @@
 #include "gatt_svr.h"
 
 uint8_t gatt_svr_chr_ota_control_val;
-uint8_t gatt_svr_chr_ota_packet_val[512];
+uint8_t gatt_svr_chr_ota_data_val[512];
 
 uint16_t ota_control_val_handle;
-uint16_t ota_packet_val_handle;
+uint16_t ota_data_val_handle;
 
 const esp_partition_t *update_partition;
 esp_ota_handle_t update_handle;
 bool updating = false;
 uint16_t num_pkgs_received = 0;
+uint16_t packet_size = 0;
 
 static int gatt_svr_chr_write(struct os_mbuf *om, uint16_t min_len,
                               uint16_t max_len, void *dst, uint16_t *len);
@@ -23,7 +24,7 @@ static int gatt_svr_chr_ota_control_cb(uint16_t conn_handle,
                                        struct ble_gatt_access_ctxt *ctxt,
                                        void *arg);
 
-static int gatt_svr_chr_ota_packet_cb(uint16_t conn_handle,
+static int gatt_svr_chr_ota_data_cb(uint16_t conn_handle,
                                       uint16_t attr_handle,
                                       struct ble_gatt_access_ctxt *ctxt,
                                       void *arg);
@@ -44,11 +45,11 @@ static const struct ble_gatt_svc_def gatt_svr_svcs[] = {
                     .val_handle = &ota_control_val_handle,
                 },
                 {
-                    // characteristic: OTA packet
-                    .uuid = &gatt_svr_chr_ota_packet_uuid.u,
-                    .access_cb = gatt_svr_chr_ota_packet_cb,
+                    // characteristic: OTA data
+                    .uuid = &gatt_svr_chr_ota_data_uuid.u,
+                    .access_cb = gatt_svr_chr_ota_data_cb,
                     .flags = BLE_GATT_CHR_F_WRITE,
-                    .val_handle = &ota_packet_val_handle,
+                    .val_handle = &ota_data_val_handle,
                 },
                 {
                     0,
@@ -106,6 +107,10 @@ static void update_ota_control(uint16_t conn_handle) {
                                  sizeof(gatt_svr_chr_ota_control_val));
       ble_gattc_notify_custom(conn_handle, ota_control_val_handle, om);
       ESP_LOGI(LOG_TAG_GATT_SVR, "OTA request acknowledgement has been sent.");
+
+      // retrieve the packet size from OTA data
+      packet_size = (gatt_svr_chr_ota_data_val[1] << 8) + gatt_svr_chr_ota_data_val[0];
+      ESP_LOGI(LOG_TAG_GATT_SVR, "Packet size is: %d", packet_size);
 
       updating = true;
       num_pkgs_received = 0;
@@ -193,30 +198,31 @@ static int gatt_svr_chr_ota_control_cb(uint16_t conn_handle,
   return BLE_ATT_ERR_UNLIKELY;
 }
 
-static int gatt_svr_chr_ota_packet_cb(uint16_t conn_handle,
+static int gatt_svr_chr_ota_data_cb(uint16_t conn_handle,
                                       uint16_t attr_handle,
                                       struct ble_gatt_access_ctxt *ctxt,
                                       void *arg) {
   int rc;
   esp_err_t err;
 
-  // store the received data into gatt_svr_chr_ota_packet_val
-  rc = gatt_svr_chr_write(ctxt->om, 1, sizeof(gatt_svr_chr_ota_packet_val),
-                          gatt_svr_chr_ota_packet_val, NULL);
+
+  // store the received data into gatt_svr_chr_ota_data_val
+  rc = gatt_svr_chr_write(ctxt->om, 1, sizeof(gatt_svr_chr_ota_data_val),
+                          gatt_svr_chr_ota_data_val, NULL);
 
   // write the received packet to the partition
   if (updating) {
     err =
-        esp_ota_write(update_handle, (const void *)gatt_svr_chr_ota_packet_val,
-                      OTA_PACKET_SIZE);
+        esp_ota_write(update_handle, (const void *)gatt_svr_chr_ota_data_val,
+                      packet_size);
     if (err != ESP_OK) {
       ESP_LOGE(LOG_TAG_GATT_SVR, "esp_ota_write failed (%s)!",
                esp_err_to_name(err));
     }
-  }
 
-  num_pkgs_received++;
-  ESP_LOGI(LOG_TAG_GATT_SVR, "Received package %d", num_pkgs_received);
+    num_pkgs_received++;
+    ESP_LOGI(LOG_TAG_GATT_SVR, "Received package %d", num_pkgs_received);
+  }
 
   return rc;
 }
@@ -236,8 +242,8 @@ static int gatt_svr_chr_access_cb_read_write(uint16_t conn_handle,
   if (ble_uuid_cmp(uuid, &gatt_svr_chr_ota_control_uuid.u) == 0) {
     data = &gatt_svr_chr_ota_control_val;
     length = 1;
-  } else if (ble_uuid_cmp(uuid, &gatt_svr_chr_ota_packet_uuid.u) == 0) {
-    data = gatt_svr_chr_ota_packet_val;
+  } else if (ble_uuid_cmp(uuid, &gatt_svr_chr_ota_data_uuid.u) == 0) {
+    data = gatt_svr_chr_ota_data_val;
     length = 512;
   } else {
     ESP_LOGE(LOG_TAG_GATT_SVR, "Read/Write callback called with unknown uuid.");
