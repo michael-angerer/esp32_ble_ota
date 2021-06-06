@@ -153,6 +153,14 @@ static void update_ota_control(uint16_t conn_handle) {
         gatt_svr_chr_ota_control_val = SVR_CHR_OTA_CONTROL_REQUEST_NAK;
       } else {
         gatt_svr_chr_ota_control_val = SVR_CHR_OTA_CONTROL_REQUEST_ACK;
+        updating = true;
+
+        // retrieve the packet size from OTA data
+        packet_size =
+            (gatt_svr_chr_ota_data_val[1] << 8) + gatt_svr_chr_ota_data_val[0];
+        ESP_LOGI(LOG_TAG_GATT_SVR, "Packet size is: %d", packet_size);
+
+        num_pkgs_received = 0;
       }
 
       // notify the client via BLE that the OTA has been acknowledged (or not)
@@ -161,13 +169,6 @@ static void update_ota_control(uint16_t conn_handle) {
       ble_gattc_notify_custom(conn_handle, ota_control_val_handle, om);
       ESP_LOGI(LOG_TAG_GATT_SVR, "OTA request acknowledgement has been sent.");
 
-      // retrieve the packet size from OTA data
-      packet_size =
-          (gatt_svr_chr_ota_data_val[1] << 8) + gatt_svr_chr_ota_data_val[0];
-      ESP_LOGI(LOG_TAG_GATT_SVR, "Packet size is: %d", packet_size);
-
-      updating = true;
-      num_pkgs_received = 0;
       break;
 
     case SVR_CHR_OTA_CONTROL_DONE:
