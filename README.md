@@ -1,6 +1,6 @@
 # BLE OTA Ready ESP Project + Python Client Code
 
-This project contains OTA update capabilities via BLE implemented using the NimBLE stack and a Python bases client code using the Bleak library. 
+This project contains OTA update capabilities via BLE implemented using the NimBLE stack and a Python-based client code using the Bleak library.  
 
 # References
 
