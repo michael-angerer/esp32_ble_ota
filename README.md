@@ -14,7 +14,7 @@ Note: Please use the developer version of Bleak (or a version greater than 0.11.
 
 
 # Licence 
-Free software: MIT license
+http://www.apache.org/licenses/LICENSE-2.0
 
 # Blog Post 
 
