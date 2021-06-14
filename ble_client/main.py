@@ -37,19 +37,9 @@ async def send_ota(file_path):
     t0 = datetime.datetime.now()
     queue = asyncio.Queue()
     firmware = []
-    sum_pkgs = 0
-    num_sent_pkgs = 0
 
     esp32 = await _search_for_esp32()
     async with BleakClient(esp32) as client:
-
-        async def _send_pkg(pkg_to_sent):
-            print(f"Sending packet {num_sent_pkgs}/{sum_pkgs}.")
-            await client.write_gatt_char(
-                OTA_DATA_UUID,
-                pkg_to_sent,
-                response=True
-            )
 
         async def _ota_notification_handler(sender: int, data: bytearray):
             if data == SVR_CHR_OTA_CONTROL_REQUEST_ACK:
@@ -70,14 +60,17 @@ async def send_ota(file_path):
             else:
                 print(f"Notification received: sender: {sender}, data: {data}")
 
+        # subscribe to OTA control
         await client.start_notify(
             OTA_CONTROL_UUID,
             _ota_notification_handler
         )
 
+        # compute the packet size
         # note this only works with Bleak >= 0.12.0
         packet_size = (client.mtu_size - 3)
 
+        # write the packet size to OTA Data
         print(f"Sending packet size: {packet_size}.")
         await client.write_gatt_char(
             OTA_DATA_UUID,
@@ -89,28 +82,36 @@ async def send_ota(file_path):
         with open(file_path, "rb") as file:
             while junk := file.read(packet_size):
                 firmware.append(junk)
-        sum_pkgs = len(firmware)
 
+        # write the request OP code to OTA Control
         print("Sending OTA request.")
         await client.write_gatt_char(
             OTA_CONTROL_UUID,
             SVR_CHR_OTA_CONTROL_REQUEST
         )
 
+        # wait for the response
         await asyncio.sleep(1)
-
         if await queue.get() == "ack":
-            for pkg in firmware:
-                num_sent_pkgs += 1
-                await _send_pkg(pkg)
 
+            # sequentially write all packets to OTA data
+            for i, pkg in enumerate(firmware):
+                print(f"Sending packet {i+1}/{len(firmware)}.")
+                await client.write_gatt_char(
+                    OTA_DATA_UUID,
+                    pkg,
+                    response=True
+                )
+
+            # write done OP code to OTA Control
             print("Sending OTA done.")
             await client.write_gatt_char(
                 OTA_CONTROL_UUID,
                 SVR_CHR_OTA_CONTROL_DONE
             )
-            await asyncio.sleep(1)
 
+            # wait for the response
+            await asyncio.sleep(1)
             if await queue.get() == "ack":
                 dt = datetime.datetime.now() - t0
                 print(f"OTA successful! Total time: {dt}")
@@ -123,4 +124,3 @@ async def send_ota(file_path):
 
 if __name__ == '__main__':
     asyncio.run(send_ota("esp32_ble_ota.bin"))
-
