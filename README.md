@@ -19,4 +19,4 @@ http://www.apache.org/licenses/LICENSE-2.0
 # Blog Post 
 
 The concept behind this project is fully explained in the following blog post:
-* https://michaelangerer.dev/esp32/ble/2021/06/01/esp32-ota-part-1.html
+* https://michaelangerer.dev/esp32/ble/ota/2021/06/01/esp32-ota-part-1.html
