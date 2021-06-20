@@ -67,7 +67,6 @@ async def send_ota(file_path):
         )
 
         # compute the packet size
-        # note this only works with Bleak >= 0.12.0
         packet_size = (client.mtu_size - 3)
 
         # write the packet size to OTA Data

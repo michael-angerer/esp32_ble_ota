@@ -10,9 +10,6 @@ The ESP code is based on the official example provided by Espressif:
 The Python client code is implemented using Bleak:
 * https://github.com/hbldh/bleak
 
-Note: Please use the developer version of Bleak (or a version greater than 0.11.0). The client script needs a feature only recently added to the code. 
-
-
 # License 
 http://www.apache.org/licenses/LICENSE-2.0
 
