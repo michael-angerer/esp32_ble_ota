@@ -79,8 +79,8 @@ async def send_ota(file_path):
 
         # split the firmware into packets
         with open(file_path, "rb") as file:
-            while junk := file.read(packet_size):
-                firmware.append(junk)
+            while chunk := file.read(packet_size):
+                firmware.append(chunk)
 
         # write the request OP code to OTA Control
         print("Sending OTA request.")
