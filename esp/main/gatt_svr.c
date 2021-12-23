@@ -18,11 +18,6 @@ static const char *model_num = "ESP32";
 static int gatt_svr_chr_write(struct os_mbuf *om, uint16_t min_len,
                               uint16_t max_len, void *dst, uint16_t *len);
 
-static int gatt_svr_chr_access_cb_read_write(uint16_t conn_handle,
-                                             uint16_t attr_handle,
-                                             struct ble_gatt_access_ctxt *ctxt,
-                                             void *arg);
-
 static int gatt_svr_chr_ota_control_cb(uint16_t conn_handle,
                                        uint16_t attr_handle,
                                        struct ble_gatt_access_ctxt *ctxt,
@@ -277,40 +272,6 @@ static int gatt_svr_chr_ota_data_cb(uint16_t conn_handle, uint16_t attr_handle,
   }
 
   return rc;
-}
-
-static int gatt_svr_chr_access_cb_read_write(uint16_t conn_handle,
-                                             uint16_t attr_handle,
-                                             struct ble_gatt_access_ctxt *ctxt,
-                                             void *arg) {
-  int rc;
-  void *data;
-  uint16_t length;
-
-  const ble_uuid_t *uuid = ctxt->chr->uuid;
-  uint8_t write_access = ctxt->op == BLE_GATT_ACCESS_OP_WRITE_CHR;
-  uint8_t read_access = ctxt->op == BLE_GATT_ACCESS_OP_READ_CHR;
-
-  if (ble_uuid_cmp(uuid, &gatt_svr_chr_ota_control_uuid.u) == 0) {
-    data = &gatt_svr_chr_ota_control_val;
-    length = 1;
-  } else if (ble_uuid_cmp(uuid, &gatt_svr_chr_ota_data_uuid.u) == 0) {
-    data = gatt_svr_chr_ota_data_val;
-    length = 512;
-  } else {
-    ESP_LOGE(LOG_TAG_GATT_SVR, "Read/Write callback called with unknown uuid.");
-    return BLE_ATT_ERR_UNLIKELY;
-  }
-
-  if (read_access) {
-    rc = os_mbuf_append(ctxt->om, data, length);
-    return rc == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
-  } else if (write_access) {
-    rc = gatt_svr_chr_write(ctxt->om, 1, length, data, NULL);
-    return rc;
-  }
-  assert(0);
-  return BLE_ATT_ERR_UNLIKELY;
 }
 
 void gatt_svr_init() {
