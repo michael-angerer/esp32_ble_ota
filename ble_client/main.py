@@ -96,6 +96,9 @@ async def send_ota(file_path):
             # sequentially write all packets to OTA data
             for i, pkg in enumerate(firmware):
                 print(f"Sending packet {i+1}/{len(firmware)}.")
+                # if we are writing a bunch of data, set response to false and havea worker mechanisim
+                # client responds periodically to a service with details on how much data has been received :)
+                # this coulld also speed up OTA consideraby 
                 await client.write_gatt_char(
                     OTA_DATA_UUID,
                     pkg,
