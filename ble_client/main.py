@@ -122,4 +122,4 @@ async def send_ota(file_path):
 
 
 if __name__ == '__main__':
-    asyncio.run(send_ota("esp32_ble_ota.bin"))
+    asyncio.run(send_ota("esp.bin"))
