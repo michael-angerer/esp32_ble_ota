@@ -5,6 +5,8 @@ set(MAIN_REQUIRES
     bt
     bootloader
     app_update
+    BMI160_driver
+    bmi160Impl
 )
 
 idf_component_register(SRCS "gap.c" "gatt_svr.c" "main.c" 

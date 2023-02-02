@@ -2,7 +2,8 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,python,c
 
 ## VSCode
-.vscode
+.vscode/*
+!.vscode/c_cpp_properties.json
 
 ## Pycharm 
 .idea

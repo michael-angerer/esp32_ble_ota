@@ -5,6 +5,8 @@
 #include "nvs_flash.h"
 #include "esp_bt.h"
 #include "driver/gpio.h"
+#include "bmi160.h"
+#include "bmi160Impl.h"
 
 /*
   Custom component includes
