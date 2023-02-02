@@ -1,0 +1,8 @@
+[submodule "esp/components/lsm303agr-pid"]
+	path = esp/components/lsm303agr-pid
+	url = https://github.com/Valiturus-Team/lsm303agr-pid
+	branch = master
+[submodule "esp/components/BMI160_driver"]
+	path = esp/components/BMI160_driver
+	url = https://github.com/Valiturus-Team/BMI160_driver
+	branch = master
