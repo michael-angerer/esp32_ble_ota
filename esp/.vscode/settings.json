@@ -2,5 +2,10 @@
     "idf.adapterTargetName": "esp32c3",
     "idf.openOcdConfigs": [
         "board/esp32c3-ftdi.cfg"
-    ]
+    ],
+    "idf.flashType": "UART",
+    "idf.portWin": "COM4",
+    "files.associations": {
+        "ble_ota_example.h": "c"
+    }
 }

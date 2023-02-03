@@ -48,7 +48,7 @@ extern "C"
     int lsmInit();
     int lsmAccellDataReady();
     int lsmMagDataReady();
-    int lsmReadMagData();
+    int lsmReadMagData(int16_t *data_raw_acceleration, float *acceleration_mg);
     int lsmReadAcellData(int16_t *data_raw_acceleration, float *acceleration_mg);
     int lsmReadTempratureData();
 

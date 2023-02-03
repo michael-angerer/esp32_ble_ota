@@ -49,7 +49,6 @@ int32_t i2c_read_slave(i2c_port_t port, uint8_t addr, const uint8_t *reg,
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     if (reg)
     {
-        // ESP_LOGI(LSM_IMPL_TAG, "REG");
         i2c_master_start(cmd);
         i2c_master_write_byte(cmd, addr | I2C_MASTER_WRITE, true);
         i2c_master_write_byte(cmd, *reg | 0x80, true);
@@ -59,7 +58,6 @@ int32_t i2c_read_slave(i2c_port_t port, uint8_t addr, const uint8_t *reg,
     }
     if (data)
     {
-        // ESP_LOGI(LSM_IMPL_TAG, "Data start");
         i2c_master_start(cmd);
         i2c_master_write_byte(cmd, addr | I2C_MASTER_READ, true);
         i2c_master_read(cmd, data, len - 1, (i2c_ack_type_t)I2C_ACK_VAL);
@@ -146,16 +144,13 @@ int lsmInit()
     // initialize magnetometre
     // uint8_t ret = __lsmMagInit(dev_ctx_mg);
     // if (ret != 0)
-    // {
-    //     ESP_LOGI(LSM_IMPL_TAG, "lsm303agr mag init error %d", ret);
-    //     return ret;
+    // {    //     return ret;
     // }
 
     // initialize accelleration device
     uint8_t ret = __lsmAcellInit();
     if (ret != 0)
     {
-        ESP_LOGI(LSM_IMPL_TAG, "lsm303agr acell init error %d", ret);
         return ret;
     }
 
@@ -170,7 +165,6 @@ int __lsmMagInit()
     lsm303agr_mag_device_id_get(&dev_ctx_mg, &whoamI);
     if (whoamI != LSM303AGR_ID_MG)
     {
-        ESP_LOGI(LSM_IMPL_TAG, "init lsm303agr accell fail got address: %d", whoamI);
         return -1;
     }
 
@@ -178,7 +172,6 @@ int __lsmMagInit()
     esp_err_t ret = lsm303agr_mag_reset_set(&dev_ctx_mg, PROPERTY_ENABLE);
     if (ret != 0)
     {
-        ESP_LOGI(LSM_IMPL_TAG, "unable to reset mag, ret = %d", ret);
         return ret;
     }
 
@@ -190,7 +183,6 @@ int __lsmMagInit()
     ret = lsm303agr_mag_block_data_update_set(&dev_ctx_mg, PROPERTY_ENABLE);
     if (ret != 0)
     {
-        ESP_LOGI(LSM_IMPL_TAG, "unable to set mag block data update, ret = %d", ret);
         return ret;
     }
 
@@ -198,7 +190,6 @@ int __lsmMagInit()
     ret = lsm303agr_mag_data_rate_set(&dev_ctx_mg, LSM303AGR_MG_ODR_10Hz);
     if (ret != 0)
     {
-        ESP_LOGI(LSM_IMPL_TAG, "unable to set data rate, ret = %d", ret);
         return ret;
     }
     /* Set accelerometer full scale */
@@ -207,7 +198,6 @@ int __lsmMagInit()
                                          LSM303AGR_SENS_OFF_CANC_EVERY_ODR);
     if (ret != 0)
     {
-        ESP_LOGI(LSM_IMPL_TAG, "unable to set reset mode, ret = %d", ret);
         return ret;
     }
     /* Enable temperature compensation on mag sensor */
@@ -220,7 +210,6 @@ int __lsmMagInit()
                                            LSM303AGR_CONTINUOUS_MODE);
     if (ret != 0)
     {
-        ESP_LOGI(LSM_IMPL_TAG, "unable to set mag operating mode, ret = %d", ret);
         return ret;
     }
 
@@ -234,7 +223,6 @@ int __lsmAcellInit()
     lsm303agr_xl_device_id_get(&dev_ctx_xl, &whoamI);
     if (whoamI != LSM303AGR_ID_XL)
     {
-        ESP_LOGI(LSM_IMPL_TAG, "init lsm303agr accell fail got address: %d", whoamI);
         return -1;
     }
 
@@ -242,7 +230,6 @@ int __lsmAcellInit()
     esp_err_t ret = lsm303agr_xl_block_data_update_set(&dev_ctx_xl, PROPERTY_ENABLE);
     if (ret != 0)
     {
-        ESP_LOGI(LSM_IMPL_TAG, "unable to set block data update, ret = %d", ret);
         return ret;
     }
 
@@ -250,7 +237,6 @@ int __lsmAcellInit()
     ret = lsm303agr_xl_data_rate_set(&dev_ctx_xl, LSM303AGR_XL_ODR_100Hz);
     if (ret != 0)
     {
-        ESP_LOGI(LSM_IMPL_TAG, "unable to set data rate, ret = %d", ret);
         return ret;
     }
 
@@ -258,7 +244,6 @@ int __lsmAcellInit()
     ret = lsm303agr_xl_full_scale_set(&dev_ctx_xl, LSM303AGR_2g);
     if (ret != 0)
     {
-        ESP_LOGI(LSM_IMPL_TAG, "unable to set accell full scale, ret = %d", ret);
         return ret;
     }
 
@@ -266,7 +251,6 @@ int __lsmAcellInit()
     ret = lsm303agr_temperature_meas_set(&dev_ctx_xl, LSM303AGR_TEMP_ENABLE);
     if (ret != 0)
     {
-        ESP_LOGI(LSM_IMPL_TAG, "unable to get acell status, ret = %d", ret);
         return ret;
     }
 
@@ -274,7 +258,6 @@ int __lsmAcellInit()
     ret = lsm303agr_xl_operating_mode_set(&dev_ctx_xl, LSM303AGR_HR_12bit);
     if (ret != 0)
     {
-        ESP_LOGI(LSM_IMPL_TAG, "unable to get acell status, ret = %d", ret);
         return ret;
     }
     return 0;
@@ -285,7 +268,6 @@ int lsmAccellDataReady()
     uint8_t ret = lsm303agr_xl_status_get(&dev_ctx_xl, &reg.status_reg_a);
     if (ret != 0)
     {
-        ESP_LOGI(LSM_IMPL_TAG, "lsm accell status check failed, ret = %d", ret);
         return -1;
     }
     return reg.status_reg_a.zyxda;
@@ -296,7 +278,6 @@ int lsmMagDataReady()
     uint8_t ret = lsm303agr_mag_status_get(&dev_ctx_mg, &reg.status_reg_m);
     if (ret != 0)
     {
-        ESP_LOGI(LSM_IMPL_TAG, "lsm mag status check failed, ret = %d", ret);
         return -1;
     }
     return reg.status_reg_m.zyxda;
@@ -309,14 +290,12 @@ int lsmReadAcellData(int16_t *data_raw_acceleration, float *acceleration_mg)
     uint8_t ret = __checkMinimumArraySize(data_raw_acceleration, 3);
     if (ret != 0)
     {
-        ESP_LOGI(LSM_IMPL_TAG, "raw data array is not of suffecient length");
         return -1;
     }
 
     ret = __checkMinimumArraySize(acceleration_mg, 3);
     if (ret != 0)
     {
-        ESP_LOGI(LSM_IMPL_TAG, "acell data array is not of suffecient length");
         return -1;
     }
 
@@ -325,7 +304,6 @@ int lsmReadAcellData(int16_t *data_raw_acceleration, float *acceleration_mg)
     ret = lsm303agr_acceleration_raw_get(&dev_ctx_xl, data_raw_acceleration);
     if (ret != 0)
     {
-        ESP_LOGI(LSM_IMPL_TAG, "lsm unable to get raw data, ret = %d", ret);
         return -1;
     }
 
@@ -339,21 +317,52 @@ int lsmReadAcellData(int16_t *data_raw_acceleration, float *acceleration_mg)
     return 0;
 }
 
+int lsmReadMagData(int16_t *data_raw_magnetic, float *magnetic_mG)
+{
+
+    // check raw accelleration has enough size
+    uint8_t ret = __checkMinimumArraySize(data_raw_magnetic, 3);
+    if (ret != 0)
+    {
+        return -1;
+    }
+
+    ret = __checkMinimumArraySize(magnetic_mG, 3);
+    if (ret != 0)
+    {
+        return -1;
+    }
+
+    // reset raw data memory
+    memset(data_raw_magnetic, 0x00, 3 * sizeof(int16_t));
+    ret = lsm303agr_acceleration_raw_get(&dev_ctx_xl, data_raw_magnetic);
+    if (ret != 0)
+    {
+        return -1;
+    }
+
+    magnetic_mG[0] = lsm303agr_from_lsb_to_mgauss(
+        data_raw_magnetic[0]);
+    magnetic_mG[1] = lsm303agr_from_lsb_to_mgauss(
+        data_raw_magnetic[1]);
+    magnetic_mG[2] = lsm303agr_from_lsb_to_mgauss(
+        data_raw_magnetic[2]);
+
+    return 0;
+}
+
 // checkMinimumArraySize checks that the array is atleast minimumLength items long
 int __checkMinimumArraySize(void *array, uint8_t minimumLength)
 {
     if (array == NULL)
     {
-        ESP_LOGI(LSM_IMPL_TAG, "data is set to null, size is nothing");
         return -1;
     }
 
     // ignoring length check for now :(
     // size_t dataArrayLength = sizeof((int16_t *) array) / sizeof((int16_t) 0);
     // if (dataArrayLength < minimumLength)
-    // {
-    //     ESP_LOGI(LSM_IMPL_TAG, "checkMinimumArraySize: array does not have sufficient size");
-    //     return -1;
+    // {    //     return -1;
     // }
     return 0;
 }
