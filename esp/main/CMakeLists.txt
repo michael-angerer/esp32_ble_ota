@@ -1,4 +1,5 @@
 set(MAIN_REQUIRES
+    driver
     valiturus_led
     valiturus_button
     nvs_flash
@@ -19,6 +20,11 @@ set(MAIN_SRCS
     "examples/ble_ota_example/gatt_svr.c"
     "examples/ble_ota_example/gap.c"
     "examples/bmi_160_example/bmi_160_example.c"
+    "application/bluetooth/exercise/exercise.c"
+    "application/bluetooth/ota/ota.c"
+    "application/bluetooth/bluetooth.c"
+    "application/bluetooth/bluetooth_gatt.c"
+    "application/bluetooth/bluetooth_gap.c"
     )
 
 idf_component_register(SRCS ${MAIN_SRCS} 

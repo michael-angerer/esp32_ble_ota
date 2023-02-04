@@ -19,7 +19,7 @@ int tickCount = 0;
 /*
   button interrupt handler
 */
-static void IRAM_ATTR button_interrupt_handler(void *args)
+static void IRAM_ATTR button_interrupt_handler(void *arg)
 {
     tickCount++;
 }

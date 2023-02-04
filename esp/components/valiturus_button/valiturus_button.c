@@ -22,13 +22,16 @@ static const char *TAG = "valiturus button";
 esp_err_t valiturus_button_init(onButtonPress routine)
 {
     // set gpio mode
-    gpio_pad_select_gpio(VALITURUS_BUTTON_PIN);
-    gpio_set_direction(VALITURUS_BUTTON_PIN, GPIO_MODE_INPUT);
-    gpio_pulldown_dis(VALITURUS_BUTTON_PIN);
-    gpio_pullup_en(VALITURUS_BUTTON_PIN);
-    gpio_set_intr_type(VALITURUS_BUTTON_PIN, GPIO_INTR_NEGEDGE);
+    gpio_config_t pinConf = {
+        .mode = GPIO_MODE_INPUT,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .pull_up_en = GPIO_PULLUP_ENABLE,
+        .intr_type = GPIO_INTR_NEGEDGE,
+        .pin_bit_mask = 1 << VALITURUS_BUTTON_PIN,
+    };
 
-    // add isr
-    gpio_install_isr_service(0);
+    gpio_config(&pinConf);
+
+    gpio_install_isr_service(0); // add edge triggered interrupt service
     return gpio_isr_handler_add(VALITURUS_BUTTON_PIN, routine, NULL);
 }

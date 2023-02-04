@@ -33,7 +33,7 @@ void bmi_160_example()
     ESP_LOGI(BMI_160_EXAMPLE_TAG, "ax:%d\tay:%d\taz:%d\n", bmi160_accel.x, bmi160_accel.y, bmi160_accel.z);
     ESP_LOGI(BMI_160_EXAMPLE_TAG, "gx:%d\tgy:%d\tgz:%d\n", bmi160_gyro.x, bmi160_gyro.y, bmi160_gyro.z);
 
-    vTaskDelay(250 / portTICK_RATE_MS);
+    vTaskDelay(250 / portTICK_PERIOD_MS);
     times_to_read = times_to_read + 1;
   }
 }

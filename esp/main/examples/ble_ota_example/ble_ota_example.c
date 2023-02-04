@@ -5,6 +5,17 @@
 #include "nvs_flash.h"
 #include "esp_bt.h"
 
+/*
+  A GATT service is a collection of charactarstics.
+  For example: a heart rate service contains a heart rate measurement charactaristic and a a body location charactaristic.
+
+  What does GATT do?
+    - defines the format of services and ther characteristics.
+    - defines the procedures that are used to interface with theese atributes such as service discovery,
+      characteristic reads, characteristic writes, notifications and indications.
+        
+*/
+
 #define BLE_OTA_EXAMPLE_TAG "BLE_OTA_EXAMPLE"
 
 int run_diagnostics()
@@ -69,7 +80,6 @@ void ble_ota_example()
   esp_bt_mem_release(ESP_BT_MODE_BTDM);
 
   // initialize BLE controller and nimble stack
-  esp_nimble_hci_and_controller_init();
   nimble_port_init();
 
   // register sync and reset callbacks

@@ -6,6 +6,10 @@
     "idf.flashType": "UART",
     "idf.portWin": "COM4",
     "files.associations": {
-        "ble_ota_example.h": "c"
+        "ble_ota_example.h": "c",
+        "ble_svc_gatt.h": "c",
+        "os.h": "c",
+        "regex": "c",
+        "xiosbase": "c"
     }
 }

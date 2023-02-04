@@ -1,5 +1,6 @@
 #pragma once
 
+#include "freertos/FreeRTOS.h"
 #include "esp_ota_ops.h"
 #include "host/ble_hs.h"
 #include "host/ble_uuid.h"
@@ -12,7 +13,8 @@
 #define GATT_MANUFACTURER_NAME_UUID 0x2A29
 #define GATT_MODEL_NUMBER_UUID 0x2A24
 
-typedef enum {
+typedef enum
+{
   SVR_CHR_OTA_CONTROL_NOP,
   SVR_CHR_OTA_CONTROL_REQUEST,
   SVR_CHR_OTA_CONTROL_REQUEST_ACK,
@@ -21,6 +23,13 @@ typedef enum {
   SVR_CHR_OTA_CONTROL_DONE_ACK,
   SVR_CHR_OTA_CONTROL_DONE_NAK,
 } svr_chr_ota_control_val_t;
+
+typedef enum
+{
+  UPDATE_SUCCESS,
+  UPDATE_FAIL,
+  NONE_ATTEMPTED,
+} svr_chr_apply_update_val_t;
 
 // service: OTA Service
 // d6f1d96d-594c-4c53-b1c6-244a1dfde6d8
@@ -39,5 +48,16 @@ static const ble_uuid128_t gatt_svr_chr_ota_control_uuid =
 static const ble_uuid128_t gatt_svr_chr_ota_data_uuid =
     BLE_UUID128_INIT(0xb0, 0xa5, 0xf8, 0x45, 0x8d, 0xca, 0x89, 0x9b, 0xd8, 0x4c,
                      0x40, 0x1f, 0x88, 0x88, 0x40, 0x23);
+
+// characteristic: OTA Data
+// 3e33db7b-9108-4549-b063-979f55610f0f
+// static const ble_uuid128_t gatt_svr_chr_ota_apply_update_uuid =
+//     BLE_UUID128_INIT(0x0f, 0x0f, 0x61, 0x55, 0x9f, 0x97, 0x63, 0xb0, 0x49, 0x45,
+//                      0x08, 0x91, 0x7b, 0xdb, 0x33, 0x3e);
+
+// 3e000000-0000-0000-0000-000000000000
+static const ble_uuid128_t gatt_svr_chr_ota_apply_update_uuid =
+    BLE_UUID128_INIT(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                     0x00, 0x00, 0x00, 0x00, 0x00, 0x3e);
 
 void gatt_svr_init();

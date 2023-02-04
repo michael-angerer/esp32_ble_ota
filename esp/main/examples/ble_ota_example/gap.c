@@ -1,4 +1,12 @@
 #include "gap.h"
+/*
+  What is a GAP service?
+  A Generic Access Profile (GAP) service is a mandatory GATT service with charactaristics the define device name and apperance charactaristics that identify the device.
+
+  ESP-IDF provides a gap library so we dont have to implement this directly in our gatt service!       
+*/
+
+
 
 uint8_t addr_type;
 

@@ -24,8 +24,16 @@ static const char *TAG = "valiturus_led";
 
 esp_err_t valiturus_led_init()
 {
-    gpio_pad_select_gpio(VALITURUS_GPIO_PIN);
-    return gpio_set_direction(VALITURUS_GPIO_PIN, GPIO_MODE_OUTPUT);
+
+    gpio_reset_pin(VALITURUS_GPIO_PIN);
+    gpio_config_t pinConf = {
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_down_en = 0,
+        .pull_up_en = 0,
+        .intr_type = GPIO_INTR_DISABLE,
+        .pin_bit_mask = 1 << VALITURUS_GPIO_PIN,
+    };
+    return gpio_config(&pinConf); // gpio_set_direction(VALITURUS_GPIO_PIN, GPIO_MODE_OUTPUT);
 }
 
 esp_err_t valiturus_led_set_level(bool level)
