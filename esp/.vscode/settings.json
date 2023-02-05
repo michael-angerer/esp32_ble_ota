@@ -10,6 +10,9 @@
         "ble_svc_gatt.h": "c",
         "os.h": "c",
         "regex": "c",
-        "xiosbase": "c"
+        "xiosbase": "c",
+        "ble_svc_gap.h": "c",
+        "esp_ota_ops.h": "c",
+        "ble_hs.h": "c"
     }
 }

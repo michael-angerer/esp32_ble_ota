@@ -1,7 +1,5 @@
-#include "examples/lsm303agr_example/lsm303agr_example.h"
-#include "examples/button_led_example/button_led_example.h"
-#include "examples/ble_ota_example/ble_ota_example.h"
-#include "examples/bmi_160_example/bmi_160_example.h"
+#include "nvs_flash.h"
+#include "application/ota/ota.h"
 
 // bluetooth part of the application
 #include "application/bluetooth/bluetooth.h"
@@ -10,5 +8,17 @@
 
 void app_main(void)
 {
-  button_led_test_app();
+  ota_app_init();
+
+  // Initialize NVS
+  esp_err_t ret = nvs_flash_init();
+  if (ret == ESP_ERR_NVS_NO_FREE_PAGES ||
+      ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+  {
+    ESP_ERROR_CHECK(nvs_flash_erase());
+    ret = nvs_flash_init();
+  }
+  ESP_ERROR_CHECK(ret);
+
+  bluetooth_init();
 }
