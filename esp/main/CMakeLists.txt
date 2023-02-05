@@ -26,9 +26,9 @@ set(MAIN_SRCS
     "application/exercise/exercise.c"
     "application/ota/ota.c"
     "application/bluetooth/bluetooth.c"
-    "application/bluetooth/bluetooth_gatt.c"
-    "application/bluetooth/bluetooth_gap.c"
-    "application/bluetooth/bluetooth_ota.c"
+    "application/bluetooth/gatt.c"
+    "application/bluetooth/gap.c"
+    "application/bluetooth/ota_gatt_service.c"
     )
 
 idf_component_register(SRCS ${MAIN_SRCS} 

@@ -1,4 +1,4 @@
-#include "bluetooth_gap.h"
+#include "gap.h"
 #include "esp_log.h"
 #include "esp_nimble_hci.h"
 #include "host/ble_hs.h"

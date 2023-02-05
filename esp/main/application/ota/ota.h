@@ -5,7 +5,9 @@
 extern "C"
 {
 #endif
+    void rollback_image();
     void ota_app_init();
+    void verify_image();
 #ifdef __cplusplus
 }
 #endif

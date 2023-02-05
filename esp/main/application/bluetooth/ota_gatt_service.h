@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef BLUETOOTH_OTA_H_
+#ifndef OTA_GATT_SERVICE_H_
 #ifdef __cplusplus
 extern "C"
 {
@@ -24,4 +24,4 @@ extern "C"
 }
 #endif
 
-#endif // !BLUETOOTH_OTA_H_
+#endif // !OTA_GATT_SERVICE_H_

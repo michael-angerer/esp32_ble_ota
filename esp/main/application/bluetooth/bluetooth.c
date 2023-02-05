@@ -1,6 +1,6 @@
 #include "esp_log.h"
-#include "bluetooth_gap.h"
-#include "bluetooth_gatt.h"
+#include "gap.h"
+#include "gatt.h"
 #include "esp_bt.h"
 
 #include "host/ble_hs.h"
@@ -21,7 +21,6 @@
 */
 
 #define BLE_OTA_EXAMPLE_TAG "BLE_OTA_EXAMPLE"
-
 
 void bluetooth_init()
 {

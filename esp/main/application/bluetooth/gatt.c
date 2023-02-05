@@ -1,10 +1,10 @@
-#include "bluetooth_gatt.h"
+#include "gatt.h"
 #include "freertos/FreeRTOS.h"
 #include "esp_ota_ops.h"
 #include "host/ble_hs.h"
 #include "services/gap/ble_svc_gap.h"
 #include "services/gatt/ble_svc_gatt.h"
-#include "bluetooth_ota.h"
+#include "ota_gatt_service.h"
 /*
     Application code that implements bluetooth functionality
 */
