@@ -29,13 +29,16 @@ void advertise()
     fields.flags = BLE_HS_ADV_F_DISC_GEN | BLE_HS_ADV_F_BREDR_UNSUP;
 
     // include power levels
-    fields.tx_pwr_lvl_is_present = 1;
-    fields.tx_pwr_lvl = BLE_HS_ADV_TX_PWR_LVL_AUTO;
+    // fields.tx_pwr_lvl_is_present = 1;
+    // fields.tx_pwr_lvl = BLE_HS_ADV_TX_PWR_LVL_AUTO;
 
     // include device name
     fields.name = (uint8_t *)device_name;
     fields.name_len = strlen(device_name);
     fields.name_is_complete = 1;
+
+    fields.adv_itvl = 10000;
+    fields.adv_itvl_is_present = true;
 
     rc = ble_gap_adv_set_fields(&fields);
     if (rc != 0)

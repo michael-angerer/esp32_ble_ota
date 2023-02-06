@@ -40,4 +40,6 @@ void bluetooth_init()
     // set device name and start host task
     ble_svc_gap_device_name_set(device_name);
     nimble_port_freertos_init(host_task);
+
+
 }
