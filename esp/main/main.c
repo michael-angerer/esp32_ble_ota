@@ -60,7 +60,7 @@ void app_main(void) {
   // BLE Setup
 
   // initialize BLE controller and nimble stack
-  esp_nimble_hci_and_controller_init();
+  esp_nimble_hci_init();
   nimble_port_init();
 
   // register sync and reset callbacks

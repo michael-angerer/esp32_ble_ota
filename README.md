@@ -5,7 +5,7 @@ This project contains OTA update capabilities via BLE implemented using the NimB
 # References
 
 The ESP code is based on the official example provided by Espressif: 
-* https://github.com/espressif/esp-idf/tree/v4.2/examples/bluetooth/nimble/blehr
+* https://github.com/espressif/esp-idf/tree/v5.1/examples/bluetooth/nimble/blehr
 
 The Python client code is implemented using Bleak:
 * https://github.com/hbldh/bleak
